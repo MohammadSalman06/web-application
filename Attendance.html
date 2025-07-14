@@ -1,0 +1,3559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Attendance Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #3f37c9;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --info: #4895ef;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --white: #ffffff;
+            --sidebar-width: 250px;
+            --header-height: 60px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+
+        /* Login Portal Selection */
+        .portal-selection {
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 20px;
+        }
+
+        .portal-container {
+            display: flex;
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .portal-option {
+            flex: 1;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .portal-option:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .portal-option i {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .portal-option h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .portal-option p {
+            color: var(--gray);
+        }
+
+        .portal-divider {
+            width: 1px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--primary);
+            color: var(--white);
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-collapsed {
+            margin-left: calc(-1 * var(--sidebar-width));
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            transition: all 0.3s;
+        }
+
+        .main-content-expanded {
+            margin-left: 0;
+        }
+
+        .header {
+            height: var(--header-height);
+            background: var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .content {
+            padding: 20px;
+            min-height: calc(100vh - var(--header-height));
+        }
+
+        /* Sidebar Styles */
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h3 {
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+        .sidebar-menu ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-menu li {
+            position: relative;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+        }
+
+        .sidebar-menu a i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .sidebar-menu .badge {
+            position: absolute;
+            right: 20px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        /* Header Styles */
+        .toggle-sidebar {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h5 {
+            margin-bottom: 0;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .stat-card i {
+            font-size: 30px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn i {
+            margin-right: 5px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #3ab4d9;
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e5177a;
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e68a1a;
+            color: white;
+        }
+
+        .btn-info {
+            background: var(--info);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #3a7bc5;
+            color: white;
+        }
+
+        .btn-light {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .btn-light:hover {
+            background: #e2e6ea;
+            color: var(--dark);
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        /* Tables */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th, .table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .table th {
+            font-weight: 600;
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .table tr:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: rgba(76, 201, 240, 0.1);
+            color: var(--success);
+        }
+
+        .badge-danger {
+            background: rgba(247, 37, 133, 0.1);
+            color: var(--danger);
+        }
+
+        .badge-warning {
+            background: rgba(248, 150, 30, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-info {
+            background: rgba(72, 149, 239, 0.1);
+            color: var(--info);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            outline: none;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            background-color: white;
+            transition: all 0.3s;
+        }
+
+        .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            outline: none;
+        }
+
+        /* Tabs */
+        .nav-tabs {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            padding-left: 0;
+            margin-bottom: 20px;
+            list-style: none;
+        }
+
+        .nav-tabs .nav-item {
+            margin-bottom: -1px;
+        }
+
+        .nav-tabs .nav-link {
+            padding: 10px 20px;
+            border: 1px solid transparent;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            color: var(--gray);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-tabs .nav-link:hover {
+            border-color: rgba(0, 0, 0, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary);
+            background-color: white;
+            border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) white;
+        }
+
+        .tab-content {
+            padding: 20px;
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+        }
+
+        /* Charts */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-dialog {
+            background: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(-50px);
+            transition: all 0.3s;
+        }
+
+        .modal.show .modal-dialog {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            margin-bottom: 0;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: all 0.3s;
+        }
+
+        .close:hover {
+            opacity: 1;
+        }
+
+        /* Progress */
+        .progress {
+            height: 10px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        .alert-success {
+            background: rgba(76, 201, 240, 0.1);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-danger {
+            background: rgba(247, 37, 133, 0.1);
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+        }
+
+        .alert-warning {
+            background: rgba(248, 150, 30, 0.1);
+            color: var(--warning);
+            border-left: 4px solid var(--warning);
+        }
+
+        .alert-info {
+            background: rgba(72, 149, 239, 0.1);
+            color: var(--info);
+            border-left: 4px solid var(--info);
+        }
+
+        /* Login Page */
+        .login-container {
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 20px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
+
+        .login-header {
+            padding: 30px;
+            background: var(--primary);
+            color: white;
+            text-align: center;
+        }
+
+        .login-header h2 {
+            margin-bottom: 10px;
+        }
+
+        .login-body {
+            padding: 30px;
+        }
+
+        .login-footer {
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.02);
+            text-align: center;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .login-footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .divider-text {
+            padding: 0 10px;
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                margin-left: calc(-1 * var(--sidebar-width));
+            }
+
+            .sidebar.show {
+                margin-left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .portal-container {
+                flex-direction: column;
+            }
+
+            .portal-divider {
+                width: 100%;
+                height: 1px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-fade {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .animate-slide {
+            animation: slideInDown 0.5s ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Webcam Scanner */
+        .scanner-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: #333;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+        }
+
+        .scanner-laser {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: red;
+            opacity: 0.8;
+            top: 0;
+            animation: scanLaser 2s infinite;
+        }
+
+        @keyframes scanLaser {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
+
+        /* Face Detection */
+        .face-detection-box {
+            position: absolute;
+            border: 3px solid #00ff00;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0); }
+        }
+
+        /* Fingerprint Scanner */
+        .fingerprint-scanner {
+            width: 120px;
+            height: 160px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 10a40 40 0 1 0 40 40 40 40 0 0 0-40-40zm0 75a35 35 0 1 1 35-35 35 35 0 0 1-35 35z" fill="%23333"/><path d="M50 20a30 30 0 1 0 30 30 30 30 0 0 0-30-30zm0 55a25 25 0 1 1 25-25 25 25 0 0 1-25 25z" fill="%23333"/></svg>') center no-repeat;
+            background-size: contain;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+
+        .fingerprint-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background: var(--primary);
+            transition: height 0.1s;
+        }
+
+        /* Student Dashboard Specific */
+        .student-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .attendance-progress {
+            margin-bottom: 30px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .progress-label span {
+            font-weight: 500;
+        }
+
+        .upcoming-classes {
+            margin-top: 30px;
+        }
+
+        .class-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 10px;
+        }
+
+        .class-info {
+            flex: 1;
+        }
+
+        .class-time {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .check-in-btn {
+            margin-left: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Portal Selection (Initially visible) -->
+    <div class="portal-selection" id="portalSelection">
+        <div class="portal-container animate-slide">
+            <div class="portal-option" id="adminPortalBtn">
+                <i class="fas fa-user-shield"></i>
+                <h3>Administrator Portal</h3>
+                <p>Access the administrative dashboard to manage students, courses, and attendance records</p>
+            </div>
+            <div class="portal-divider"></div>
+            <div class="portal-option" id="studentPortalBtn">
+                <i class="fas fa-user-graduate"></i>
+                <h3>Student Portal</h3>
+                <p>Access your attendance records and check in for classes</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Page -->
+    <div class="login-container" id="adminLoginPage" style="display: none;">
+        <div class="login-card animate-slide">
+            <div class="login-header">
+                <h2>Admin Login</h2>
+                <p>Please login to access the admin dashboard</p>
+            </div>
+            <div class="login-body">
+                <form id="adminLoginForm">
+                    <div class="form-group">
+                        <label for="adminUsername" class="form-label">Username</label>
+                        <input type="text" id="adminUsername" class="form-control" placeholder="Enter admin username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPassword" class="form-label">Password</label>
+                        <input type="password" id="adminPassword" class="form-control" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+            </div>
+            <div class="login-footer">
+                <a href="#" id="backToPortalFromAdmin">Back to portal selection</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Login Page -->
+    <div class="login-container" id="studentLoginPage" style="display: none;">
+        <div class="login-card animate-slide">
+            <div class="login-header">
+                <h2>Student Login</h2>
+                <p>Please login to access your attendance portal</p>
+            </div>
+            <div class="login-body">
+                <form id="studentLoginForm">
+                    <div class="form-group">
+                        <label for="studentUsername" class="form-label">Student ID</label>
+                        <input type="text" id="studentUsername" class="form-control" placeholder="Enter your student ID" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentPassword" class="form-label">Password</label>
+                        <input type="password" id="studentPassword" class="form-control" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+
+                <div class="divider">
+                    <span class="divider-text">OR</span>
+                </div>
+
+                <div class="text-center">
+                    <button class="btn btn-light btn-block mb-2" id="studentBiometricLoginBtn">
+                        <i class="fas fa-fingerprint"></i> Biometric Login
+                    </button>
+                    <button class="btn btn-light btn-block" id="studentFaceLoginBtn">
+                        <i class="fas fa-user-circle"></i> Face Recognition Login
+                    </button>
+                </div>
+            </div>
+            <div class="login-footer">
+                <a href="#" id="backToPortalFromStudent">Back to portal selection</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Application (Initially hidden) -->
+    <div class="app-container" id="adminAppContainer" style="display: none;">
+        <!-- Sidebar -->
+        <div class="sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <h3>Admin Dashboard</h3>
+                <button class="toggle-sidebar" id="adminToggleSidebar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li>
+                        <a href="#" class="active" data-target="adminDashboard">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-target="adminStudents">
+                            <i class="fas fa-users"></i> Students
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-target="adminCourses">
+                            <i class="fas fa-book"></i> Courses
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-target="adminAttendance">
+                            <i class="fas fa-clipboard-check"></i> Attendance
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-target="adminReports">
+                            <i class="fas fa-chart-bar"></i> Reports
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-target="adminSettings">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content" id="adminMainContent">
+            <!-- Header -->
+            <div class="header">
+                <button class="toggle-sidebar" id="adminMobileToggleSidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="user-menu">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=random" alt="User">
+                    <div class="user-info">
+                        <span class="user-name" id="adminCurrentUserName">Administrator</span>
+                        <span class="user-role">Admin</span>
+                    </div>
+                    <button class="btn btn-sm btn-light ml-3" id="adminLogoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content">
+                <!-- Dashboard Tab -->
+                <div class="tab-content active" id="adminDashboard">
+                    <h4 class="mb-4">Admin Dashboard</h4>
+                    
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="stat-card" style="background: linear-gradient(135deg, #4cc9f0, #4895ef);">
+                                <i class="fas fa-users"></i>
+                                <div class="stat-value" id="totalStudentsCount">0</div>
+                                <div class="stat-label">Total Students</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card" style="background: linear-gradient(135deg, #4895ef, #4361ee);">
+                                <i class="fas fa-book"></i>
+                                <div class="stat-value" id="totalCoursesCount">0</div>
+                                <div class="stat-label">Total Courses</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card" style="background: linear-gradient(135deg, #4361ee, #3f37c9);">
+                                <i class="fas fa-clipboard-check"></i>
+                                <div class="stat-value">92%</div>
+                                <div class="stat-label">Today's Attendance</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card" style="background: linear-gradient(135deg, #3f37c9, #3a0ca3);">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <div class="stat-value">7</div>
+                                <div class="stat-label">Pending Approvals</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Weekly Attendance Overview</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="adminAttendanceChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Attendance by Department</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="adminDepartmentChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <button class="btn btn-primary btn-block mb-2" id="adminTakeAttendanceBtn">
+                                        <i class="fas fa-clipboard-check"></i> Take Attendance
+                                    </button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-success btn-block mb-2" id="adminAddStudentBtn">
+                                        <i class="fas fa-user-plus"></i> Add Student
+                                    </button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-info btn-block mb-2" id="adminGenerateReportBtn">
+                                        <i class="fas fa-file-export"></i> Generate Report
+                                    </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-warning btn-block mb-2" id="adminCheckInBtn">
+                                        <i class="fas fa-fingerprint"></i> Check In Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Recent Activity</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Student</th>
+                                            <th>Course</th>
+                                            <th>Date</th>
+                                            <th>Method</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentActivityTable">
+                                        <!-- Will be populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Students Tab -->
+                <div class="tab-content" id="adminStudents">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4>Student Management</h4>
+                        <button class="btn btn-success" id="adminAddNewStudentBtn">
+                            <i class="fas fa-user-plus"></i> Add New Student
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <input type="text" id="adminStudentSearch" class="form-control" placeholder="Search students...">
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-primary" id="adminSearchStudentBtn">
+                                        <i class="fas fa-search"></i> Search
+                                    </button>
+                                    <button class="btn btn-light" id="adminResetStudentSearchBtn">
+                                        <i class="fas fa-undo"></i> Reset
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table" id="adminStudentsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Student ID</th>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Department</th>
+                                            <th>Year</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="studentsTableBody">
+                                        <!-- Will be populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                    </li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#">Next</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Courses Tab -->
+                <div class="tab-content" id="adminCourses">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4>Course Management</h4>
+                        <button class="btn btn-success" id="adminAddNewCourseBtn">
+                            <i class="fas fa-plus"></i> Add New Course
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <input type="text" id="adminCourseSearch" class="form-control" placeholder="Search courses...">
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-primary" id="adminSearchCourseBtn">
+                                        <i class="fas fa-search"></i> Search
+                                    </button>
+                                    <button class="btn btn-light" id="adminResetCourseSearchBtn">
+                                        <i class="fas fa-undo"></i> Reset
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table" id="adminCoursesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>Name</th>
+                                            <th>Department</th>
+                                            <th>Credits</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="coursesTableBody">
+                                        <!-- Will be populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                    </li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#">Next</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance Tab -->
+                <div class="tab-content" id="adminAttendance">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4>Attendance Management</h4>
+                        <button class="btn btn-success" id="adminTakeAttendanceBtn2">
+                            <i class="fas fa-clipboard-check"></i> Take Attendance
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <select class="form-select" id="adminAttendanceCourseFilter">
+                                        <option value="">Filter by Course</option>
+                                        <!-- Will be populated dynamically -->
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="date" id="adminAttendanceDateFilter" class="form-control">
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="adminAttendanceStatusFilter">
+                                        <option value="">Filter by Status</option>
+                                        <option value="Present">Present</option>
+                                        <option value="Absent">Absent</option>
+                                        <option value="Late">Late</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-primary" id="adminFilterAttendanceBtn">
+                                        <i class="fas fa-filter"></i> Filter
+                                    </button>
+                                    <button class="btn btn-light" id="adminResetAttendanceFilterBtn">
+                                        <i class="fas fa-undo"></i> Reset
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table" id="adminAttendanceTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Student</th>
+                                            <th>Course</th>
+                                            <th>Date</th>
+                                            <th>Time</th>
+                                            <th>Method</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="attendanceTableBody">
+                                        <!-- Will be populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                    </li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#">Next</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Tab -->
+                <div class="tab-content" id="adminReports">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4>Attendance Reports</h4>
+                        <button class="btn btn-success" id="adminGenerateReportBtn2">
+                            <i class="fas fa-file-export"></i> Generate Report
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Course</label>
+                                        <select class="form-select" id="adminReportCourse">
+                                            <option value="">All Courses</option>
+                                            <!-- Will be populated dynamically -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Start Date</label>
+                                        <input type="date" id="adminReportStartDate" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">End Date</label>
+                                        <input type="date" id="adminReportEndDate" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label class="form-label">Report Type</label>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="adminReportType" id="adminSummaryReport" value="summary" checked>
+                                        <label class="form-check-label" for="adminSummaryReport">Summary</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="adminReportType" id="adminDetailedReport" value="detailed">
+                                        <label class="form-check-label" for="adminDetailedReport">Detailed</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center mb-4">
+                                <button class="btn btn-primary" id="adminPreviewReportBtn">
+                                    <i class="fas fa-eye"></i> Preview Report
+                                </button>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Report Preview</h5>
+                                </div>
+                                <div class="card-body">
+                                    <pre id="adminReportPreview" style="height: 300px; overflow: auto; background: #f8f9fa; padding: 15px; border-radius: 5px;">
+ATTENDANCE REPORT
+================
+
+Course: All Courses
+Period: 2023-06-01 to 2023-06-15
+
+SUMMARY
+-------
+Student            Present    Absent    Percentage
+-------            -------    ------    ----------
+John Doe           18         2         90.0%
+Jane Smith         17         3         85.0%
+Robert Johnson     20         0         100.0%
+                                    </pre>
+                                </div>
+                                <div class="card-footer text-end">
+                                    <button class="btn btn-success" id="adminExportPdfBtn">
+                                        <i class="fas fa-file-pdf"></i> Export as PDF
+                                    </button>
+                                    <button class="btn btn-info" id="adminExportCsvBtn">
+                                        <i class="fas fa-file-csv"></i> Export as CSV
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="tab-content" id="adminSettings">
+                    <h4 class="mb-4">System Settings</h4>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5>User Profile</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="adminProfileForm">
+                                        <div class="form-group">
+                                            <label class="form-label">Name</label>
+                                            <input type="text" class="form-control" value="Administrator">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Email</label>
+                                            <input type="email" class="form-control" value="admin@college.edu">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Current Password</label>
+                                            <input type="password" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">New Password</label>
+                                            <input type="password" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Confirm New Password</label>
+                                            <input type="password" class="form-control">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save"></i> Save Changes
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5>System Configuration</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="adminSystemForm">
+                                        <div class="form-group">
+                                            <label class="form-label">Attendance Methods</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="adminBiometricCheck" checked>
+                                                <label class="form-check-label" for="adminBiometricCheck">Biometric</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="adminFaceCheck" checked>
+                                                <label class="form-check-label" for="adminFaceCheck">Face Recognition</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="adminCardCheck" checked>
+                                                <label class="form-check-label" for="adminCardCheck">ID Card</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="adminManualCheck" checked>
+                                                <label class="form-check-label" for="adminManualCheck">Manual Entry</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Late Threshold (minutes)</label>
+                                            <input type="number" class="form-control" value="15">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Low Attendance Warning (%)</label>
+                                            <input type="number" class="form-control" value="75">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save"></i> Save Configuration
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Application (Initially hidden) -->
+    <div class="app-container" id="studentAppContainer" style="display: none;">
+        <!-- Sidebar -->
+        <div class="sidebar" id="studentSidebar">
+            <div class="sidebar-header">
+                <h3>Student Portal</h3>
+                <button class="toggle-sidebar" id="studentToggleSidebar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li>
+                        <a href="#" class="active" data-target="studentDashboard">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-target="studentAttendance">
+                            <i class="fas fa-clipboard-check"></i> My Attendance
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-target="studentCourses">
+                            <i class="fas fa-book"></i> My Courses
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content" id="studentMainContent">
+            <!-- Header -->
+            <div class="header">
+                <button class="toggle-sidebar" id="studentMobileToggleSidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="user-menu">
+                    <img src="https://ui-avatars.com/api/?name=John+Doe&background=random" alt="User">
+                    <div class="user-info">
+                        <span class="user-name" id="studentCurrentUserName">John Doe</span>
+                        <span class="user-role">Student</span>
+                    </div>
+                    <button class="btn btn-sm btn-light ml-3" id="studentLogoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content">
+                <!-- Dashboard Tab -->
+                <div class="tab-content active" id="studentDashboard">
+                    <h4 class="mb-4">Student Dashboard</h4>
+                    
+                    <div class="student-stats">
+                        <div class="stat-card" style="background: linear-gradient(135deg, #4cc9f0, #4895ef); width: 32%;">
+                            <i class="fas fa-clipboard-check"></i>
+                            <div class="stat-value">92%</div>
+                            <div class="stat-label">Overall Attendance</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #4895ef, #4361ee); width: 32%;">
+                            <i class="fas fa-check-circle"></i>
+                            <div class="stat-value">18</div>
+                            <div class="stat-label">Present Days</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #4361ee, #3f37c9); width: 32%;">
+                            <i class="fas fa-times-circle"></i>
+                            <div class="stat-value">2</div>
+                            <div class="stat-label">Absent Days</div>
+                        </div>
+                    </div>
+
+                    <div class="attendance-progress">
+                        <h5 class="mb-3">Attendance by Course</h5>
+                        
+                        <div class="mb-4">
+                            <div class="progress-label">
+                                <span>CS101 - Programming</span>
+                                <span>90%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="progress-label">
+                                <span>EE201 - Circuits</span>
+                                <span>85%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="progress-label">
+                                <span>ME301 - Thermodynamics</span>
+                                <span>95%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" style="width: 95%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="upcoming-classes">
+                        <h5 class="mb-3">Upcoming Classes</h5>
+                        
+                        <div class="class-card">
+                            <div class="class-info">
+                                <h6>CS101 - Programming</h6>
+                                <div class="class-time">Today, 10:00 AM - 11:30 AM</div>
+                            </div>
+                            <button class="btn btn-primary check-in-btn" id="checkInClass1">
+                                <i class="fas fa-fingerprint"></i> Check In
+                            </button>
+                        </div>
+                        
+                        <div class="class-card">
+                            <div class="class-info">
+                                <h6>EE201 - Circuits</h6>
+                                <div class="class-time">Tomorrow, 9:00 AM - 10:30 AM</div>
+                            </div>
+                            <button class="btn btn-outline-secondary check-in-btn" disabled>
+                                Check In Available at 8:30 AM
+                            </button>
+                        </div>
+                        
+                        <div class="class-card">
+                            <div class="class-info">
+                                <h6>ME301 - Thermodynamics</h6>
+                                <div class="class-time">Tomorrow, 2:00 PM - 3:30 PM</div>
+                            </div>
+                            <button class="btn btn-outline-secondary check-in-btn" disabled>
+                                Check In Available at 1:30 PM
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance Tab -->
+                <div class="tab-content" id="studentAttendance">
+                    <h4 class="mb-4">My Attendance Records</h4>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <select class="form-select" id="studentAttendanceCourseFilter">
+                                        <option value="">All Courses</option>
+                                        <option value="CS101">CS101 - Programming</option>
+                                        <option value="EE201">EE201 - Circuits</option>
+                                        <option value="ME301">ME301 - Thermodynamics</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="date" id="studentAttendanceDateFilter" class="form-control">
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-primary" id="studentFilterAttendanceBtn">
+                                        <i class="fas fa-filter"></i> Filter
+                                    </button>
+                                    <button class="btn btn-light" id="studentResetAttendanceFilterBtn">
+                                        <i class="fas fa-undo"></i> Reset
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Course</th>
+                                            <th>Time</th>
+                                            <th>Method</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>2023-06-15</td>
+                                            <td>CS101 - Programming</td>
+                                            <td>09:15:23</td>
+                                            <td><span class="badge badge-info">Biometric</span></td>
+                                            <td><span class="badge badge-success">Present</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2023-06-14</td>
+                                            <td>EE201 - Circuits</td>
+                                            <td>10:30:45</td>
+                                            <td><span class="badge badge-info">Face ID</span></td>
+                                            <td><span class="badge badge-success">Present</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2023-06-13</td>
+                                            <td>ME301 - Thermodynamics</td>
+                                            <td>13:45:12</td>
+                                            <td><span class="badge badge-info">ID Card</span></td>
+                                            <td><span class="badge badge-danger">Absent</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2023-06-12</td>
+                                            <td>CS101 - Programming</td>
+                                            <td>09:20:10</td>
+                                            <td><span class="badge badge-info">Manual</span></td>
+                                            <td><span class="badge badge-warning">Late</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Courses Tab -->
+                <div class="tab-content" id="studentCourses">
+                    <h4 class="mb-4">My Courses</h4>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>Name</th>
+                                            <th>Department</th>
+                                            <th>Schedule</th>
+                                            <th>Attendance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>CS101</td>
+                                            <td>Introduction to Programming</td>
+                                            <td>Computer Science</td>
+                                            <td>Mon, Wed 10:00-11:30</td>
+                                            <td>
+                                                <div class="progress" style="height: 10px;">
+                                                    <div class="progress-bar" style="width: 90%"></div>
+                                                </div>
+                                                <small>90% (18/20)</small>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>EE201</td>
+                                            <td>Circuit Analysis</td>
+                                            <td>Electrical Engineering</td>
+                                            <td>Tue, Thu 9:00-10:30</td>
+                                            <td>
+                                                <div class="progress" style="height: 10px;">
+                                                    <div class="progress-bar" style="width: 85%"></div>
+                                                </div>
+                                                <small>85% (17/20)</small>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>ME301</td>
+                                            <td>Thermodynamics</td>
+                                            <td>Mechanical Engineering</td>
+                                            <td>Mon, Fri 2:00-3:30</td>
+                                            <td>
+                                                <div class="progress" style="height: 10px;">
+                                                    <div class="progress-bar" style="width: 95%"></div>
+                                                </div>
+                                                <small>95% (19/20)</small>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add/Edit Student Modal -->
+    <div class="modal" id="studentModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h5 class="modal-title" id="studentModalTitle">Add New Student</h5>
+                <button class="close" id="closeStudentModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="studentForm">
+                    <input type="hidden" id="studentEditId">
+                    <div class="form-group">
+                        <label class="form-label">Student ID</label>
+                        <input type="text" id="studentId" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="studentName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="studentEmail" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Department</label>
+                        <select id="studentDepartment" class="form-select" required>
+                            <option value="">Select Department</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Electrical Engineering">Electrical Engineering</option>
+                            <option value="Mechanical Engineering">Mechanical Engineering</option>
+                            <option value="Physics">Physics</option>
+                            <option value="Mathematics">Mathematics</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Year</label>
+                        <select id="studentYear" class="form-select" required>
+                            <option value="">Select Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Biometric Data</label>
+                        <input type="file" id="studentBiometric" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Face Data</label>
+                        <input type="file" id="studentFace" class="form-control" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ID Card Number</label>
+                        <input type="text" id="studentCardId" class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" id="cancelStudentBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveStudentBtn">Save Student</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Course Modal -->
+    <div class="modal" id="courseModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h5 class="modal-title" id="courseModalTitle">Add New Course</h5>
+                <button class="close" id="closeCourseModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="courseForm">
+                    <input type="hidden" id="courseEditId">
+                    <div class="form-group">
+                        <label class="form-label">Course Code</label>
+                        <input type="text" id="courseCode" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Course Name</label>
+                        <input type="text" id="courseName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Department</label>
+                        <select id="courseDepartment" class="form-select" required>
+                            <option value="">Select Department</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Electrical Engineering">Electrical Engineering</option>
+                            <option value="Mechanical Engineering">Mechanical Engineering</option>
+                            <option value="Physics">Physics</option>
+                            <option value="Mathematics">Mathematics</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Credits</label>
+                        <input type="number" id="courseCredits" class="form-control" min="1" max="10" value="3" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" id="cancelCourseBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveCourseBtn">Save Course</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Take Attendance Modal -->
+    <div class="modal" id="attendanceModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h5 class="modal-title">Take Attendance</h5>
+                <button class="close" id="closeAttendanceModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="attendanceForm">
+                    <div class="form-group">
+                        <label class="form-label">Student</label>
+                        <select id="attendanceStudent" class="form-select" required>
+                            <option value="">Select Student</option>
+                            <!-- Will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Course</label>
+                        <select id="attendanceCourse" class="form-select" required>
+                            <option value="">Select Course</option>
+                            <!-- Will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" id="attendanceDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Method</label>
+                        <select id="attendanceMethod" class="form-select" required>
+                            <option value="">Select Method</option>
+                            <option value="Biometric">Biometric</option>
+                            <option value="Face Recognition">Face Recognition</option>
+                            <option value="ID Card">ID Card</option>
+                            <option value="Manual">Manual</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select id="attendanceStatus" class="form-select" required>
+                            <option value="">Select Status</option>
+                            <option value="Present">Present</option>
+                            <option value="Absent">Absent</option>
+                            <option value="Late">Late</option>
+                            <option value="Excused">Excused</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" id="cancelAttendanceBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveAttendanceBtn">Record Attendance</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check In Modal -->
+    <div class="modal" id="checkInModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h5 class="modal-title">Check In</h5>
+                <button class="close" id="closeCheckInModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <h5>Select check-in method</h5>
+                    <p class="text-muted">Please select your preferred check-in method</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <button class="btn btn-primary btn-block" id="biometricCheckInBtn">
+                            <i class="fas fa-fingerprint"></i> Biometric
+                        </button>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <button class="btn btn-primary btn-block" id="faceCheckInBtn">
+                            <i class="fas fa-user-circle"></i> Face Recognition
+                        </button>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <button class="btn btn-primary btn-block" id="cardCheckInBtn">
+                            <i class="fas fa-id-card"></i> ID Card
+                        </button>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <button class="btn btn-primary btn-block" id="manualCheckInBtn">
+                            <i class="fas fa-keyboard"></i> Manual
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" id="cancelCheckInBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biometric Check In Modal -->
+    <div class="modal" id="biometricModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h5 class="modal-title">Biometric Verification</h5>
+            </div>
+            <div class="modal-body text-center">
+                <div class="fingerprint-scanner">
+                    <div class="fingerprint-progress" id="fingerprintProgress"></div>
+                </div>
+                <h5 class="mb-3" id="biometricStatus">Place your finger on the scanner</h5>
+                <div class="progress mb-3">
+                    <div class="progress-bar" id="biometricProgressBar" style="width: 0%"></div>
+                </div>
+                <p class="text-muted">Verification in progress...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Face Recognition Modal -->
+    <div class="modal" id="faceModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h5 class="modal-title">Face Recognition</h5>
+            </div>
+            <div class="modal-body text-center">
+                <div class="scanner-container">
+                    <div class="scanner-overlay">
+                        <div class="spinner-border text-light mb-3" role="status" id="faceSpinner">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <h5 id="faceStatus">Initializing camera...</h5>
+                    </div>
+                    <div class="face-detection-box" id="faceDetectionBox" style="display: none;"></div>
+                </div>
+                <div class="progress mb-3">
+                    <div class="progress-bar" id="faceProgressBar" style="width: 0%"></div>
+                </div>
+                <button class="btn btn-primary" id="startFaceRecognitionBtn">
+                    <i class="fas fa-camera"></i> Start Face Recognition
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ID Card Scan Modal -->
+    <div class="modal" id="idCardModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h5 class="modal-title">ID Card Scan</h5>
+            </div>
+            <div class="modal-body text-center">
+                <div class="scanner-container">
+                    <div class="scanner-laser" id="scannerLaser"></div>
+                    <div class="scanner-overlay">
+                        <h5 id="idCardStatus">Please insert your ID card into the scanner</h5>
+                        <div class="card-placeholder" id="cardPlaceholder" style="width: 250px; height: 150px; background: #f8f9fa; border: 2px dashed #dee2e6; margin: 20px auto; display: none;"></div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="startScanBtn">
+                    <i class="fas fa-barcode"></i> Start Scan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual Check In Modal -->
+    <div class="modal" id="manualCheckInModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h5 class="modal-title">Manual Check In</h5>
+                <button class="close" id="closeManualCheckInModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="manualCheckInForm">
+                    <div class="form-group">
+                        <label class="form-label">Course</label>
+                        <select id="manualCourse" class="form-select" required>
+                            <option value="">Select Course</option>
+                            <!-- Will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Student ID</label>
+                        <input type="text" id="manualStudentId" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Your Name</label>
+                        <input type="text" id="manualStudentName" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" id="cancelManualCheckInBtn">Cancel</button>
+                <button class="btn btn-primary" id="submitManualCheckInBtn">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalTitle">Confirm Action</h5>
+                <button class="close" id="closeConfirmModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmModalMessage">Are you sure you want to perform this action?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" id="cancelConfirmBtn">Cancel</button>
+                <button class="btn btn-danger" id="confirmBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="notificationToast" style="position: fixed; bottom: 20px; right: 20px; z-index: 1100; display: none;">
+        <div class="toast-header">
+            <strong class="me-auto" id="toastTitle">Notification</strong>
+            <button type="button" class="btn-close" id="closeToast">&times;</button>
+        </div>
+        <div class="toast-body" id="toastMessage">
+            This is a notification message.
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script>
+        // Data storage
+        const dataStore = {
+            students: [
+                {
+                    id: 1,
+                    studentId: 'STU1001',
+                    name: 'John Doe',
+                    email: 'john.doe@college.edu',
+                    department: 'Computer Science',
+                    year: '3',
+                    cardId: 'CS1001',
+                    biometricData: null,
+                    faceData: null
+                },
+                {
+                    id: 2,
+                    studentId: 'STU1002',
+                    name: 'Jane Smith',
+                    email: 'jane.smith@college.edu',
+                    department: 'Electrical Engineering',
+                    year: '2',
+                    cardId: 'EE1002',
+                    biometricData: null,
+                    faceData: null
+                },
+                {
+                    id: 3,
+                    studentId: 'STU1003',
+                    name: 'Robert Johnson',
+                    email: 'robert.johnson@college.edu',
+                    department: 'Mechanical Engineering',
+                    year: '4',
+                    cardId: 'ME1003',
+                    biometricData: null,
+                    faceData: null
+                }
+            ],
+            courses: [
+                {
+                    id: 1,
+                    code: 'CS101',
+                    name: 'Introduction to Programming',
+                    department: 'Computer Science',
+                    credits: '4'
+                },
+                {
+                    id: 2,
+                    code: 'EE201',
+                    name: 'Circuit Analysis',
+                    department: 'Electrical Engineering',
+                    credits: '3'
+                },
+                {
+                    id: 3,
+                    code: 'ME301',
+                    name: 'Thermodynamics',
+                    department: 'Mechanical Engineering',
+                    credits: '4'
+                }
+            ],
+            attendance: [
+                {
+                    id: 1,
+                    studentId: 1,
+                    courseId: 1,
+                    date: '2023-06-15',
+                    time: '09:15:23',
+                    method: 'Biometric',
+                    status: 'Present'
+                },
+                {
+                    id: 2,
+                    studentId: 2,
+                    courseId: 2,
+                    date: '2023-06-15',
+                    time: '10:30:45',
+                    method: 'Face Recognition',
+                    status: 'Present'
+                },
+                {
+                    id: 3,
+                    studentId: 3,
+                    courseId: 3,
+                    date: '2023-06-14',
+                    time: '13:45:12',
+                    method: 'ID Card',
+                    status: 'Absent'
+                },
+                {
+                    id: 4,
+                    studentId: 1,
+                    courseId: 1,
+                    date: '2023-06-12',
+                    time: '09:20:10',
+                    method: 'Manual',
+                    status: 'Late'
+                }
+            ]
+        };
+
+        // DOM Elements
+        const portalSelection = document.getElementById('portalSelection');
+        const adminPortalBtn = document.getElementById('adminPortalBtn');
+        const studentPortalBtn = document.getElementById('studentPortalBtn');
+        
+        // Admin Login
+        const adminLoginPage = document.getElementById('adminLoginPage');
+        const adminLoginForm = document.getElementById('adminLoginForm');
+        const backToPortalFromAdmin = document.getElementById('backToPortalFromAdmin');
+        
+        // Student Login
+        const studentLoginPage = document.getElementById('studentLoginPage');
+        const studentLoginForm = document.getElementById('studentLoginForm');
+        const studentBiometricLoginBtn = document.getElementById('studentBiometricLoginBtn');
+        const studentFaceLoginBtn = document.getElementById('studentFaceLoginBtn');
+        const backToPortalFromStudent = document.getElementById('backToPortalFromStudent');
+        
+        // Admin App
+        const adminAppContainer = document.getElementById('adminAppContainer');
+        const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+        const adminCurrentUserName = document.getElementById('adminCurrentUserName');
+        
+        // Student App
+        const studentAppContainer = document.getElementById('studentAppContainer');
+        const studentLogoutBtn = document.getElementById('studentLogoutBtn');
+        const studentCurrentUserName = document.getElementById('studentCurrentUserName');
+        
+        // Admin Sidebar
+        const adminSidebar = document.getElementById('adminSidebar');
+        const adminToggleSidebar = document.getElementById('adminToggleSidebar');
+        const adminMobileToggleSidebar = document.getElementById('adminMobileToggleSidebar');
+        const adminMainContent = document.getElementById('adminMainContent');
+        
+        // Student Sidebar
+        const studentSidebar = document.getElementById('studentSidebar');
+        const studentToggleSidebar = document.getElementById('studentToggleSidebar');
+        const studentMobileToggleSidebar = document.getElementById('studentMobileToggleSidebar');
+        const studentMainContent = document.getElementById('studentMainContent');
+        
+        // Admin Tabs
+        const adminTabContents = document.querySelectorAll('#adminAppContainer .tab-content');
+        const adminTabLinks = document.querySelectorAll('#adminSidebar .sidebar-menu a');
+        
+        // Student Tabs
+        const studentTabContents = document.querySelectorAll('#studentAppContainer .tab-content');
+        const studentTabLinks = document.querySelectorAll('#studentSidebar .sidebar-menu a');
+        
+        // Admin Dashboard
+        const adminTakeAttendanceBtn = document.getElementById('adminTakeAttendanceBtn');
+        const adminAddStudentBtn = document.getElementById('adminAddStudentBtn');
+        const adminGenerateReportBtn = document.getElementById('adminGenerateReportBtn');
+        const adminCheckInBtn = document.getElementById('adminCheckInBtn');
+        const totalStudentsCount = document.getElementById('totalStudentsCount');
+        const totalCoursesCount = document.getElementById('totalCoursesCount');
+        const recentActivityTable = document.getElementById('recentActivityTable');
+        
+        // Student Dashboard
+        const checkInClass1 = document.getElementById('checkInClass1');
+        
+        // Admin Students
+        const adminAddNewStudentBtn = document.getElementById('adminAddNewStudentBtn');
+        const studentsTableBody = document.getElementById('studentsTableBody');
+        
+        // Admin Courses
+        const adminAddNewCourseBtn = document.getElementById('adminAddNewCourseBtn');
+        const coursesTableBody = document.getElementById('coursesTableBody');
+        
+        // Admin Attendance
+        const adminTakeAttendanceBtn2 = document.getElementById('adminTakeAttendanceBtn2');
+        const attendanceTableBody = document.getElementById('attendanceTableBody');
+        const adminAttendanceCourseFilter = document.getElementById('adminAttendanceCourseFilter');
+        
+        // Admin Reports
+        const adminGenerateReportBtn2 = document.getElementById('adminGenerateReportBtn2');
+        const adminReportCourse = document.getElementById('adminReportCourse');
+        
+        // Modals
+        const studentModal = document.getElementById('studentModal');
+        const studentModalTitle = document.getElementById('studentModalTitle');
+        const studentForm = document.getElementById('studentForm');
+        const studentEditId = document.getElementById('studentEditId');
+        const studentIdInput = document.getElementById('studentId');
+        const studentNameInput = document.getElementById('studentName');
+        const studentEmailInput = document.getElementById('studentEmail');
+        const studentDepartmentSelect = document.getElementById('studentDepartment');
+        const studentYearSelect = document.getElementById('studentYear');
+        const studentCardIdInput = document.getElementById('studentCardId');
+        
+        const courseModal = document.getElementById('courseModal');
+        const courseModalTitle = document.getElementById('courseModalTitle');
+        const courseForm = document.getElementById('courseForm');
+        const courseEditId = document.getElementById('courseEditId');
+        const courseCodeInput = document.getElementById('courseCode');
+        const courseNameInput = document.getElementById('courseName');
+        const courseDepartmentSelect = document.getElementById('courseDepartment');
+        const courseCreditsInput = document.getElementById('courseCredits');
+        
+        const attendanceModal = document.getElementById('attendanceModal');
+        const attendanceForm = document.getElementById('attendanceForm');
+        const attendanceStudentSelect = document.getElementById('attendanceStudent');
+        const attendanceCourseSelect = document.getElementById('attendanceCourse');
+        const attendanceDateInput = document.getElementById('attendanceDate');
+        const attendanceMethodSelect = document.getElementById('attendanceMethod');
+        const attendanceStatusSelect = document.getElementById('attendanceStatus');
+        
+        const checkInModal = document.getElementById('checkInModal');
+        const manualCheckInModal = document.getElementById('manualCheckInModal');
+        const manualCourseSelect = document.getElementById('manualCourse');
+        
+        // Modal buttons
+        const closeStudentModal = document.getElementById('closeStudentModal');
+        const cancelStudentBtn = document.getElementById('cancelStudentBtn');
+        const saveStudentBtn = document.getElementById('saveStudentBtn');
+        
+        const closeCourseModal = document.getElementById('closeCourseModal');
+        const cancelCourseBtn = document.getElementById('cancelCourseBtn');
+        const saveCourseBtn = document.getElementById('saveCourseBtn');
+        
+        const closeAttendanceModal = document.getElementById('closeAttendanceModal');
+        const cancelAttendanceBtn = document.getElementById('cancelAttendanceBtn');
+        const saveAttendanceBtn = document.getElementById('saveAttendanceBtn');
+        
+        const closeCheckInModal = document.getElementById('closeCheckInModal');
+        const cancelCheckInBtn = document.getElementById('cancelCheckInBtn');
+        const biometricCheckInBtn = document.getElementById('biometricCheckInBtn');
+        const faceCheckInBtn = document.getElementById('faceCheckInBtn');
+        const cardCheckInBtn = document.getElementById('cardCheckInBtn');
+        const manualCheckInBtn = document.getElementById('manualCheckInBtn');
+        
+        const startFaceRecognitionBtn = document.getElementById('startFaceRecognitionBtn');
+        const startScanBtn = document.getElementById('startScanBtn');
+        
+        const closeManualCheckInModal = document.getElementById('closeManualCheckInModal');
+        const cancelManualCheckInBtn = document.getElementById('cancelManualCheckInBtn');
+        const submitManualCheckInBtn = document.getElementById('submitManualCheckInBtn');
+        
+        const closeConfirmModal = document.getElementById('closeConfirmModal');
+        const cancelConfirmBtn = document.getElementById('cancelConfirmBtn');
+        const confirmBtn = document.getElementById('confirmBtn');
+        
+        // Notification
+        const notificationToast = document.getElementById('notificationToast');
+        const closeToast = document.getElementById('closeToast');
+        const toastTitle = document.getElementById('toastTitle');
+        const toastMessage = document.getElementById('toastMessage');
+        
+        // Charts
+        let adminAttendanceChart, adminDepartmentChart;
+        
+        // Current user
+        let currentUser = null;
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize data
+            updateStudentCount();
+            updateCourseCount();
+            renderStudentsTable();
+            renderCoursesTable();
+            renderAttendanceTable();
+            renderRecentActivity();
+            populateCourseDropdowns();
+            
+            // Initialize charts
+            initAdminCharts();
+            
+            // Set today's date as default for attendance forms
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('attendanceDate').value = today;
+            
+            // Event listeners
+            setupEventListeners();
+        });
+        
+        function initAdminCharts() {
+            // Weekly Attendance Chart
+            const attendanceCtx = document.getElementById('adminAttendanceChart').getContext('2d');
+            adminAttendanceChart = new Chart(attendanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                    datasets: [{
+                        label: 'Attendance %',
+                        data: [65, 72, 80, 78, 85],
+                        backgroundColor: 'rgba(67, 97, 238, 0.2)',
+                        borderColor: 'rgba(67, 97, 238, 1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Department Attendance Chart
+            const departmentCtx = document.getElementById('adminDepartmentChart').getContext('2d');
+            adminDepartmentChart = new Chart(departmentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Computer Science', 'Electrical', 'Mechanical', 'Physics', 'Mathematics'],
+                    datasets: [{
+                        data: [85, 78, 82, 90, 88],
+                        backgroundColor: [
+                            'rgba(76, 201, 240, 0.7)',
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(58, 12, 163, 0.7)',
+                            'rgba(248, 150, 30, 0.7)',
+                            'rgba(247, 37, 133, 0.7)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateStudentCount() {
+            totalStudentsCount.textContent = dataStore.students.length;
+        }
+        
+        function updateCourseCount() {
+            totalCoursesCount.textContent = dataStore.courses.length;
+        }
+        
+        function renderStudentsTable() {
+            studentsTableBody.innerHTML = '';
+            
+            dataStore.students.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${student.studentId}</td>
+                    <td>${student.name}</td>
+                    <td>${student.email}</td>
+                    <td>${student.department}</td>
+                    <td>${student.year}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary edit-student" data-id="${student.id}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-student" data-id="${student.id}">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                `;
+                studentsTableBody.appendChild(row);
+            });
+        }
+        
+        function renderCoursesTable() {
+            coursesTableBody.innerHTML = '';
+            
+            dataStore.courses.forEach(course => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${course.code}</td>
+                    <td>${course.name}</td>
+                    <td>${course.department}</td>
+                    <td>${course.credits}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary edit-course" data-id="${course.id}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-course" data-id="${course.id}">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                `;
+                coursesTableBody.appendChild(row);
+            });
+        }
+        
+        function renderAttendanceTable() {
+            attendanceTableBody.innerHTML = '';
+            
+            dataStore.attendance.forEach(record => {
+                const student = dataStore.students.find(s => s.id === record.studentId);
+                const course = dataStore.courses.find(c => c.id === record.courseId);
+                
+                if (student && course) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${student.name}</td>
+                        <td>${course.code} - ${course.name}</td>
+                        <td>${record.date}</td>
+                        <td>${record.time}</td>
+                        <td><span class="badge badge-info">${record.method}</span></td>
+                        <td><span class="badge ${getStatusBadgeClass(record.status)}">${record.status}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary edit-attendance" data-id="${record.id}">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-attendance" data-id="${record.id}">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    `;
+                    attendanceTableBody.appendChild(row);
+                }
+            });
+        }
+        
+        function renderRecentActivity() {
+            recentActivityTable.innerHTML = '';
+            
+            // Get last 4 attendance records
+            const recentRecords = [...dataStore.attendance].reverse().slice(0, 4);
+            
+            recentRecords.forEach(record => {
+                const student = dataStore.students.find(s => s.id === record.studentId);
+                const course = dataStore.courses.find(c => c.id === record.courseId);
+                
+                if (student && course) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${student.name}</td>
+                        <td>${course.code} - ${course.name}</td>
+                        <td>${record.date} ${record.time}</td>
+                        <td><span class="badge badge-info">${record.method}</span></td>
+                        <td><span class="badge ${getStatusBadgeClass(record.status)}">${record.status}</span></td>
+                    `;
+                    recentActivityTable.appendChild(row);
+                }
+            });
+        }
+        
+        function populateCourseDropdowns() {
+            // Clear existing options
+            adminAttendanceCourseFilter.innerHTML = '<option value="">Filter by Course</option>';
+            adminReportCourse.innerHTML = '<option value="">All Courses</option>';
+            attendanceCourseSelect.innerHTML = '<option value="">Select Course</option>';
+            manualCourseSelect.innerHTML = '<option value="">Select Course</option>';
+            
+            // Add course options
+            dataStore.courses.forEach(course => {
+                const option1 = document.createElement('option');
+                option1.value = course.id;
+                option1.textContent = `${course.code} - ${course.name}`;
+                adminAttendanceCourseFilter.appendChild(option1);
+                
+                const option2 = document.createElement('option');
+                option2.value = course.id;
+                option2.textContent = `${course.code} - ${course.name}`;
+                adminReportCourse.appendChild(option2);
+                
+                const option3 = document.createElement('option');
+                option3.value = course.id;
+                option3.textContent = `${course.code} - ${course.name}`;
+                attendanceCourseSelect.appendChild(option3);
+                
+                const option4 = document.createElement('option');
+                option4.value = course.id;
+                option4.textContent = `${course.code} - ${course.name}`;
+                manualCourseSelect.appendChild(option4);
+            });
+        }
+        
+        function populateStudentDropdown() {
+            // Clear existing options
+            attendanceStudentSelect.innerHTML = '<option value="">Select Student</option>';
+            
+            // Add student options
+            dataStore.students.forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.id;
+                option.textContent = `${student.name} (${student.studentId})`;
+                attendanceStudentSelect.appendChild(option);
+            });
+        }
+        
+        function getStatusBadgeClass(status) {
+            switch (status) {
+                case 'Present': return 'badge-success';
+                case 'Absent': return 'badge-danger';
+                case 'Late': return 'badge-warning';
+                default: return 'badge-info';
+            }
+        }
+        
+        function setupEventListeners() {
+            // Portal selection
+            adminPortalBtn.addEventListener('click', function() {
+                portalSelection.style.display = 'none';
+                adminLoginPage.style.display = 'flex';
+            });
+            
+            studentPortalBtn.addEventListener('click', function() {
+                portalSelection.style.display = 'none';
+                studentLoginPage.style.display = 'flex';
+            });
+            
+            // Back to portal buttons
+            backToPortalFromAdmin.addEventListener('click', function(e) {
+                e.preventDefault();
+                adminLoginPage.style.display = 'none';
+                portalSelection.style.display = 'flex';
+            });
+            
+            backToPortalFromStudent.addEventListener('click', function(e) {
+                e.preventDefault();
+                studentLoginPage.style.display = 'none';
+                portalSelection.style.display = 'flex';
+            });
+            
+            // Admin login form
+            adminLoginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('adminUsername').value;
+                const password = document.getElementById('adminPassword').value;
+                
+                // Simple authentication (in a real app, this would be a server call)
+                if (username === 'admin' && password === 'admin123') {
+                    currentUser = {
+                        id: 1,
+                        username: 'admin',
+                        name: 'Administrator',
+                        role: 'admin',
+                        email: 'admin@college.edu'
+                    };
+                    showAdminApp();
+                } else {
+                    showNotification('Login Failed', 'Invalid username or password', 'danger');
+                }
+            });
+            
+            // Student login form
+            studentLoginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('studentUsername').value;
+                const password = document.getElementById('studentPassword').value;
+                
+                // Simple authentication (in a real app, this would be a server call)
+                if (username === 'student1' && password === 'password1') {
+                    currentUser = {
+                        id: 2,
+                        username: 'student1',
+                        name: 'John Doe',
+                        role: 'student',
+                        email: 'john.doe@college.edu'
+                    };
+                    showStudentApp();
+                } else {
+                    showNotification('Login Failed', 'Invalid student ID or password', 'danger');
+                }
+            });
+            
+            // Student biometric login
+            studentBiometricLoginBtn.addEventListener('click', function() {
+                simulateBiometricLogin('student');
+            });
+            
+            // Student face recognition login
+            studentFaceLoginBtn.addEventListener('click', function() {
+                simulateFaceRecognitionLogin('student');
+            });
+            
+            // Admin logout
+            adminLogoutBtn.addEventListener('click', function() {
+                logoutUser();
+            });
+            
+            // Student logout
+            studentLogoutBtn.addEventListener('click', function() {
+                logoutUser();
+            });
+            
+            // Admin sidebar toggle
+            adminToggleSidebar.addEventListener('click', function() {
+                adminSidebar.classList.toggle('sidebar-collapsed');
+                adminMainContent.classList.toggle('main-content-expanded');
+            });
+            
+            adminMobileToggleSidebar.addEventListener('click', function() {
+                adminSidebar.classList.toggle('show');
+            });
+            
+            // Student sidebar toggle
+            studentToggleSidebar.addEventListener('click', function() {
+                studentSidebar.classList.toggle('sidebar-collapsed');
+                studentMainContent.classList.toggle('main-content-expanded');
+            });
+            
+            studentMobileToggleSidebar.addEventListener('click', function() {
+                studentSidebar.classList.toggle('show');
+            });
+            
+            // Admin tab navigation
+            adminTabLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all tabs and links
+                    adminTabContents.forEach(tab => tab.classList.remove('active'));
+                    adminTabLinks.forEach(tabLink => tabLink.classList.remove('active'));
+                    
+                    // Add active class to current tab and link
+                    const target = this.getAttribute('data-target');
+                    document.getElementById(target).classList.add('active');
+                    this.classList.add('active');
+                });
+            });
+            
+            // Student tab navigation
+            studentTabLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all tabs and links
+                    studentTabContents.forEach(tab => tab.classList.remove('active'));
+                    studentTabLinks.forEach(tabLink => tabLink.classList.remove('active'));
+                    
+                    // Add active class to current tab and link
+                    const target = this.getAttribute('data-target');
+                    document.getElementById(target).classList.add('active');
+                    this.classList.add('active');
+                });
+            });
+            
+            // Admin dashboard buttons
+            adminTakeAttendanceBtn.addEventListener('click', function() {
+                showModal(attendanceModal);
+                populateStudentDropdown();
+            });
+            
+            adminAddStudentBtn.addEventListener('click', function() {
+                studentModalTitle.textContent = 'Add New Student';
+                studentForm.reset();
+                studentEditId.value = '';
+                showModal(studentModal);
+            });
+            
+            adminGenerateReportBtn.addEventListener('click', function() {
+                // Switch to reports tab
+                adminTabContents.forEach(tab => tab.classList.remove('active'));
+                document.getElementById('adminReports').classList.add('active');
+                
+                // Update active link
+                adminTabLinks.forEach(tabLink => tabLink.classList.remove('active'));
+                document.querySelector('#adminSidebar .sidebar-menu a[data-target="adminReports"]').classList.add('active');
+            });
+            
+            adminCheckInBtn.addEventListener('click', function() {
+                showModal(checkInModal);
+            });
+            
+            // Student check-in button
+            checkInClass1.addEventListener('click', function() {
+                showModal(checkInModal);
+            });
+            
+            // Admin students buttons
+            adminAddNewStudentBtn.addEventListener('click', function() {
+                studentModalTitle.textContent = 'Add New Student';
+                studentForm.reset();
+                studentEditId.value = '';
+                showModal(studentModal);
+            });
+            
+            // Edit student button (delegated event)
+            studentsTableBody.addEventListener('click', function(e) {
+                if (e.target.closest('.edit-student')) {
+                    const studentId = parseInt(e.target.closest('.edit-student').getAttribute('data-id'));
+                    const student = dataStore.students.find(s => s.id === studentId);
+                    
+                    if (student) {
+                        studentModalTitle.textContent = 'Edit Student';
+                        studentEditId.value = student.id;
+                        studentIdInput.value = student.studentId;
+                        studentNameInput.value = student.name;
+                        studentEmailInput.value = student.email;
+                        studentDepartmentSelect.value = student.department;
+                        studentYearSelect.value = student.year;
+                        studentCardIdInput.value = student.cardId || '';
+                        
+                        showModal(studentModal);
+                    }
+                }
+                
+                if (e.target.closest('.delete-student')) {
+                    const studentId = parseInt(e.target.closest('.delete-student').getAttribute('data-id'));
+                    const student = dataStore.students.find(s => s.id === studentId);
+                    
+                    if (student) {
+                        showConfirmModal(
+                            'Delete Student',
+                            `Are you sure you want to delete student ${student.name} (${student.studentId})?`,
+                            function() {
+                                // Remove student
+                                dataStore.students = dataStore.students.filter(s => s.id !== studentId);
+                                
+                                // Remove attendance records for this student
+                                dataStore.attendance = dataStore.attendance.filter(a => a.studentId !== studentId);
+                                
+                                // Update UI
+                                renderStudentsTable();
+                                renderAttendanceTable();
+                                renderRecentActivity();
+                                updateStudentCount();
+                                
+                                showNotification('Success', 'Student deleted successfully');
+                            }
+                        );
+                    }
+                }
+            });
+            
+            // Admin courses buttons
+            adminAddNewCourseBtn.addEventListener('click', function() {
+                courseModalTitle.textContent = 'Add New Course';
+                courseForm.reset();
+                courseEditId.value = '';
+                showModal(courseModal);
+            });
+            
+            // Edit course button (delegated event)
+            coursesTableBody.addEventListener('click', function(e) {
+                if (e.target.closest('.edit-course')) {
+                    const courseId = parseInt(e.target.closest('.edit-course').getAttribute('data-id'));
+                    const course = dataStore.courses.find(c => c.id === courseId);
+                    
+                    if (course) {
+                        courseModalTitle.textContent = 'Edit Course';
+                        courseEditId.value = course.id;
+                        courseCodeInput.value = course.code;
+                        courseNameInput.value = course.name;
+                        courseDepartmentSelect.value = course.department;
+                        courseCreditsInput.value = course.credits;
+                        
+                        showModal(courseModal);
+                    }
+                }
+                
+                if (e.target.closest('.delete-course')) {
+                    const courseId = parseInt(e.target.closest('.delete-course').getAttribute('data-id'));
+                    const course = dataStore.courses.find(c => c.id === courseId);
+                    
+                    if (course) {
+                        showConfirmModal(
+                            'Delete Course',
+                            `Are you sure you want to delete course ${course.code} - ${course.name}?`,
+                            function() {
+                                // Remove course
+                                dataStore.courses = dataStore.courses.filter(c => c.id !== courseId);
+                                
+                                // Remove attendance records for this course
+                                dataStore.attendance = dataStore.attendance.filter(a => a.courseId !== courseId);
+                                
+                                // Update UI
+                                renderCoursesTable();
+                                renderAttendanceTable();
+                                renderRecentActivity();
+                                updateCourseCount();
+                                populateCourseDropdowns();
+                                
+                                showNotification('Success', 'Course deleted successfully');
+                            }
+                        );
+                    }
+                }
+            });
+            
+            // Admin attendance buttons
+            adminTakeAttendanceBtn2.addEventListener('click', function() {
+                showModal(attendanceModal);
+                populateStudentDropdown();
+            });
+            
+            // Edit attendance button (delegated event)
+            attendanceTableBody.addEventListener('click', function(e) {
+                if (e.target.closest('.edit-attendance')) {
+                    const attendanceId = parseInt(e.target.closest('.edit-attendance').getAttribute('data-id'));
+                    const record = dataStore.attendance.find(a => a.id === attendanceId);
+                    
+                    if (record) {
+                        populateStudentDropdown();
+                        
+                        attendanceStudentSelect.value = record.studentId;
+                        attendanceCourseSelect.value = record.courseId;
+                        attendanceDateInput.value = record.date;
+                        attendanceMethodSelect.value = record.method;
+                        attendanceStatusSelect.value = record.status;
+                        
+                        showModal(attendanceModal);
+                    }
+                }
+                
+                if (e.target.closest('.delete-attendance')) {
+                    const attendanceId = parseInt(e.target.closest('.delete-attendance').getAttribute('data-id'));
+                    const record = dataStore.attendance.find(a => a.id === attendanceId);
+                    
+                    if (record) {
+                        showConfirmModal(
+                            'Delete Attendance Record',
+                            'Are you sure you want to delete this attendance record?',
+                            function() {
+                                dataStore.attendance = dataStore.attendance.filter(a => a.id !== attendanceId);
+                                renderAttendanceTable();
+                                renderRecentActivity();
+                                showNotification('Success', 'Attendance record deleted successfully');
+                            }
+                        );
+                    }
+                }
+            });
+            
+            // Admin reports buttons
+            adminGenerateReportBtn2.addEventListener('click', function() {
+                showModal(attendanceModal);
+            });
+            
+            // Save student form
+            saveStudentBtn.addEventListener('click', function() {
+                const id = studentEditId.value;
+                const studentData = {
+                    studentId: studentIdInput.value.trim(),
+                    name: studentNameInput.value.trim(),
+                    email: studentEmailInput.value.trim(),
+                    department: studentDepartmentSelect.value,
+                    year: studentYearSelect.value,
+                    cardId: studentCardIdInput.value.trim(),
+                    biometricData: null,
+                    faceData: null
+                };
+                
+                // Validate
+                if (!studentData.studentId || !studentData.name || !studentData.email || 
+                    !studentData.department || !studentData.year) {
+                    showNotification('Error', 'Please fill all required fields', 'danger');
+                    return;
+                }
+                
+                if (id) {
+                    // Update existing student
+                    const index = dataStore.students.findIndex(s => s.id === parseInt(id));
+                    if (index !== -1) {
+                        dataStore.students[index] = {
+                            ...dataStore.students[index],
+                            ...studentData
+                        };
+                        showNotification('Success', 'Student updated successfully');
+                    }
+                } else {
+                    // Add new student
+                    const newId = dataStore.students.length > 0 ? 
+                        Math.max(...dataStore.students.map(s => s.id)) + 1 : 1;
+                    
+                    dataStore.students.push({
+                        id: newId,
+                        ...studentData
+                    });
+                    
+                    showNotification('Success', 'Student added successfully');
+                }
+                
+                // Update UI
+                renderStudentsTable();
+                updateStudentCount();
+                hideModal(studentModal);
+            });
+            
+            // Save course form
+            saveCourseBtn.addEventListener('click', function() {
+                const id = courseEditId.value;
+                const courseData = {
+                    code: courseCodeInput.value.trim(),
+                    name: courseNameInput.value.trim(),
+                    department: courseDepartmentSelect.value,
+                    credits: courseCreditsInput.value
+                };
+                
+                // Validate
+                if (!courseData.code || !courseData.name || !courseData.department || !courseData.credits) {
+                    showNotification('Error', 'Please fill all required fields', 'danger');
+                    return;
+                }
+                
+                if (id) {
+                    // Update existing course
+                    const index = dataStore.courses.findIndex(c => c.id === parseInt(id));
+                    if (index !== -1) {
+                        dataStore.courses[index] = {
+                            ...dataStore.courses[index],
+                            ...courseData
+                        };
+                        showNotification('Success', 'Course updated successfully');
+                    }
+                } else {
+                    // Add new course
+                    const newId = dataStore.courses.length > 0 ? 
+                        Math.max(...dataStore.courses.map(c => c.id)) + 1 : 1;
+                    
+                    dataStore.courses.push({
+                        id: newId,
+                        ...courseData
+                    });
+                    
+                    showNotification('Success', 'Course added successfully');
+                }
+                
+                // Update UI
+                renderCoursesTable();
+                updateCourseCount();
+                populateCourseDropdowns();
+                hideModal(courseModal);
+            });
+            
+            // Save attendance form
+            saveAttendanceBtn.addEventListener('click', function() {
+                const studentId = parseInt(attendanceStudentSelect.value);
+                const courseId = parseInt(attendanceCourseSelect.value);
+                const date = attendanceDateInput.value;
+                const method = attendanceMethodSelect.value;
+                const status = attendanceStatusSelect.value;
+                
+                // Validate
+                if (!studentId || !courseId || !date || !method || !status) {
+                    showNotification('Error', 'Please fill all required fields', 'danger');
+                    return;
+                }
+                
+                // Get current time
+                const now = new Date();
+                const time = now.toTimeString().split(' ')[0];
+                
+                // Create new attendance record
+                const newId = dataStore.attendance.length > 0 ? 
+                    Math.max(...dataStore.attendance.map(a => a.id)) + 1 : 1;
+                
+                dataStore.attendance.push({
+                    id: newId,
+                    studentId,
+                    courseId,
+                    date,
+                    time,
+                    method,
+                    status
+                });
+                
+                // Update UI
+                renderAttendanceTable();
+                renderRecentActivity();
+                hideModal(attendanceModal);
+                
+                showNotification('Success', 'Attendance recorded successfully');
+            });
+            
+            // Modal close buttons
+            closeStudentModal.addEventListener('click', function() {
+                hideModal(studentModal);
+            });
+            
+            cancelStudentBtn.addEventListener('click', function() {
+                hideModal(studentModal);
+            });
+            
+            closeCourseModal.addEventListener('click', function() {
+                hideModal(courseModal);
+            });
+            
+            cancelCourseBtn.addEventListener('click', function() {
+                hideModal(courseModal);
+            });
+            
+            closeAttendanceModal.addEventListener('click', function() {
+                hideModal(attendanceModal);
+            });
+            
+            cancelAttendanceBtn.addEventListener('click', function() {
+                hideModal(attendanceModal);
+            });
+            
+            closeCheckInModal.addEventListener('click', function() {
+                hideModal(checkInModal);
+            });
+            
+            cancelCheckInBtn.addEventListener('click', function() {
+                hideModal(checkInModal);
+            });
+            
+            closeManualCheckInModal.addEventListener('click', function() {
+                hideModal(manualCheckInModal);
+            });
+            
+            cancelManualCheckInBtn.addEventListener('click', function() {
+                hideModal(manualCheckInModal);
+            });
+            
+            closeConfirmModal.addEventListener('click', function() {
+                hideModal(confirmModal);
+            });
+            
+            cancelConfirmBtn.addEventListener('click', function() {
+                hideModal(confirmModal);
+            });
+            
+            // Check in methods
+            biometricCheckInBtn.addEventListener('click', function() {
+                hideModal(checkInModal);
+                simulateBiometricCheckIn();
+            });
+            
+            faceCheckInBtn.addEventListener('click', function() {
+                hideModal(checkInModal);
+                simulateFaceRecognitionCheckIn();
+            });
+            
+            cardCheckInBtn.addEventListener('click', function() {
+                hideModal(checkInModal);
+                simulateIdCardCheckIn();
+            });
+            
+            manualCheckInBtn.addEventListener('click', function() {
+                hideModal(checkInModal);
+                showModal(manualCheckInModal);
+            });
+            
+            // Start face recognition
+            startFaceRecognitionBtn.addEventListener('click', function() {
+                this.disabled = true;
+                document.getElementById('faceStatus').textContent = 'Scanning face...';
+                
+                // Simulate face detection
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    document.getElementById('faceProgressBar').style.width = `${progress}%`;
+                    
+                    if (progress >= 30 && progress <= 70 && Math.random() > 0.7 && !document.getElementById('faceDetectionBox').style.display) {
+                        // Face detected
+                        document.getElementById('faceDetectionBox').style.display = 'block';
+                        document.getElementById('faceStatus').textContent = 'Face detected! Verifying...';
+                        
+                        // Position the face box randomly
+                        const box = document.getElementById('faceDetectionBox');
+                        box.style.width = `${100 + Math.random() * 50}px`;
+                        box.style.height = `${100 + Math.random() * 50}px`;
+                        box.style.left = `${20 + Math.random() * 60}%`;
+                        box.style.top = `${20 + Math.random() * 60}%`;
+                    }
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        if (document.getElementById('faceDetectionBox').style.display) {
+                            // Face recognized
+                            document.getElementById('faceStatus').textContent = 'Face recognized! Recording attendance...';
+                            
+                            // Record attendance
+                            setTimeout(() => {
+                                hideModal(faceModal);
+                                recordAttendance('Face Recognition', 'Present');
+                            }, 1000);
+                        } else {
+                            // Face not detected
+                            document.getElementById('faceStatus').textContent = 'Face not detected. Please try again.';
+                            startFaceRecognitionBtn.disabled = false;
+                        }
+                    }
+                }, 200);
+            });
+            
+            // Start ID card scan
+            startScanBtn.addEventListener('click', function() {
+                this.disabled = true;
+                document.getElementById('idCardStatus').textContent = 'Scanning ID card...';
+                document.getElementById('cardPlaceholder').style.display = 'block';
+                
+                // Simulate scanning
+                setTimeout(() => {
+                    document.getElementById('idCardStatus').textContent = 'ID verified! Recording attendance...';
+                    
+                    // Record attendance
+                    setTimeout(() => {
+                        hideModal(idCardModal);
+                        recordAttendance('ID Card', 'Present');
+                    }, 1000);
+                }, 3000);
+            });
+            
+            // Submit manual check in
+            submitManualCheckInBtn.addEventListener('click', function() {
+                const courseId = manualCourseSelect.value;
+                const studentId = document.getElementById('manualStudentId').value;
+                const studentName = document.getElementById('manualStudentName').value;
+                
+                if (courseId && studentId && studentName) {
+                    hideModal(manualCheckInModal);
+                    recordAttendance('Manual', 'Present');
+                } else {
+                    showNotification('Error', 'Please fill all fields', 'danger');
+                }
+            });
+            
+            // Close notification toast
+            closeToast.addEventListener('click', function() {
+                notificationToast.style.display = 'none';
+            });
+        }
+        
+        function logoutUser() {
+            currentUser = null;
+            // Hide all application containers
+            adminAppContainer.style.display = 'none';
+            studentAppContainer.style.display = 'none';
+            
+            // Show the login page for the appropriate role
+            if (window.location.hash === '#admin') {
+                adminLoginPage.style.display = 'flex';
+            } else if (window.location.hash === '#student') {
+                studentLoginPage.style.display = 'flex';
+            } else {
+                // Default to showing portal selection
+                showPortalSelection();
+            }
+            
+            // Reset login forms
+            adminLoginForm.reset();
+            studentLoginForm.reset();
+            
+            showNotification('Logged Out', 'You have been successfully logged out');
+        }
+        
+        function showPortalSelection() {
+            portalSelection.style.display = 'flex';
+            adminLoginPage.style.display = 'none';
+            studentLoginPage.style.display = 'none';
+            adminAppContainer.style.display = 'none';
+            studentAppContainer.style.display = 'none';
+        }
+        
+        function showAdminApp() {
+            adminLoginPage.style.display = 'none';
+            adminAppContainer.style.display = 'flex';
+            
+            // Update user info
+            adminCurrentUserName.textContent = currentUser.name;
+            
+            showNotification('Welcome', `Welcome back, ${currentUser.name}!`);
+        }
+        
+        function showStudentApp() {
+            studentLoginPage.style.display = 'none';
+            studentAppContainer.style.display = 'flex';
+            
+            // Update user info
+            studentCurrentUserName.textContent = currentUser.name;
+            
+            showNotification('Welcome', `Welcome back, ${currentUser.name}!`);
+        }
+        
+        function showModal(modal) {
+            modal.classList.add('show');
+        }
+        
+        function hideModal(modal) {
+            modal.classList.remove('show');
+        }
+        
+        function showConfirmModal(title, message, callback) {
+            document.getElementById('confirmModalTitle').textContent = title;
+            document.getElementById('confirmModalMessage').textContent = message;
+            
+            // Remove previous event listeners
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            
+            // Add new event listener
+            newConfirmBtn.addEventListener('click', function() {
+                hideModal(confirmModal);
+                callback();
+            });
+            
+            showModal(confirmModal);
+        }
+        
+        function showNotification(title, message, type = 'success') {
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            
+            // Set notification type
+            const toastHeader = notificationToast.querySelector('.toast-header');
+            const toastBody = notificationToast.querySelector('.toast-body');
+            
+            toastHeader.className = 'toast-header';
+            toastBody.className = 'toast-body';
+            
+            switch (type) {
+                case 'danger':
+                    toastHeader.classList.add('bg-danger', 'text-white');
+                    break;
+                case 'warning':
+                    toastHeader.classList.add('bg-warning', 'text-dark');
+                    break;
+                case 'info':
+                    toastHeader.classList.add('bg-info', 'text-white');
+                    break;
+                default:
+                    toastHeader.classList.add('bg-success', 'text-white');
+            }
+            
+            // Show notification
+            notificationToast.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                notificationToast.style.display = 'none';
+            }, 5000);
+        }
+        
+        function recordAttendance(method, status) {
+            const now = new Date();
+            const date = now.toISOString().split('T')[0];
+            const time = now.toTimeString().split(' ')[0];
+            
+            // In a real app, this would record attendance for the current student
+            // For demo purposes, we'll just show a notification
+            showNotification('Attendance Recorded', 
+                `Your attendance has been recorded via ${method} at ${time}`);
+        }
+        
+        function simulateBiometricLogin(role) {
+            showModal(biometricModal);
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                document.getElementById('biometricProgressBar').style.width = `${progress}%`;
+                document.getElementById('fingerprintProgress').style.height = `${progress}%`;
+                
+                if (progress < 30) {
+                    document.getElementById('biometricStatus').textContent = 'Scanning fingerprint...';
+                } else if (progress < 70) {
+                    document.getElementById('biometricStatus').textContent = 'Verifying identity...';
+                } else if (progress < 90) {
+                    document.getElementById('biometricStatus').textContent = 'Matching with database...';
+                } else if (progress < 100) {
+                    document.getElementById('biometricStatus').textContent = 'Finalizing verification...';
+                }
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    document.getElementById('biometricStatus').textContent = 'Verification successful! Logging in...';
+                    
+                    // Simulate successful login
+                    if (role === 'admin') {
+                        currentUser = {
+                            id: 1,
+                            username: 'admin',
+                            name: 'Administrator',
+                            role: 'admin',
+                            email: 'admin@college.edu'
+                        };
+                        
+                        setTimeout(() => {
+                            hideModal(biometricModal);
+                            showAdminApp();
+                        }, 1000);
+                    } else {
+                        currentUser = {
+                            id: 2,
+                            username: 'student1',
+                            name: 'John Doe',
+                            role: 'student',
+                            email: 'john.doe@college.edu'
+                        };
+                        
+                        setTimeout(() => {
+                            hideModal(biometricModal);
+                            showStudentApp();
+                        }, 1000);
+                    }
+                }
+            }, 100);
+        }
+        
+        function simulateFaceRecognitionLogin(role) {
+            showModal(faceModal);
+            
+            // Simulate face recognition
+            setTimeout(() => {
+                document.getElementById('faceDetectionBox').style.display = 'block';
+                document.getElementById('faceStatus').textContent = 'Face detected! Verifying...';
+                
+                // Position the face box randomly
+                const box = document.getElementById('faceDetectionBox');
+                box.style.width = `${100 + Math.random() * 50}px`;
+                box.style.height = `${100 + Math.random() * 50}px`;
+                box.style.left = `${20 + Math.random() * 60}%`;
+                box.style.top = `${20 + Math.random() * 60}%`;
+                
+                setTimeout(() => {
+                    document.getElementById('faceStatus').textContent = 'Face recognized! Logging in...';
+                    
+                    // Simulate successful login
+                    if (role === 'admin') {
+                        currentUser = {
+                            id: 1,
+                            username: 'admin',
+                            name: 'Administrator',
+                            role: 'admin',
+                            email: 'admin@college.edu'
+                        };
+                        
+                        setTimeout(() => {
+                            hideModal(faceModal);
+                            showAdminApp();
+                        }, 1000);
+                    } else {
+                        currentUser = {
+                            id: 2,
+                            username: 'student1',
+                            name: 'John Doe',
+                            role: 'student',
+                            email: 'john.doe@college.edu'
+                        };
+                        
+                        setTimeout(() => {
+                            hideModal(faceModal);
+                            showStudentApp();
+                        }, 1000);
+                    }
+                }, 1500);
+            }, 1000);
+        }
+        
+        function simulateBiometricCheckIn() {
+            showModal(biometricModal);
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                document.getElementById('biometricProgressBar').style.width = `${progress}%`;
+                document.getElementById('fingerprintProgress').style.height = `${progress}%`;
+                
+                if (progress < 30) {
+                    document.getElementById('biometricStatus').textContent = 'Scanning fingerprint...';
+                } else if (progress < 70) {
+                    document.getElementById('biometricStatus').textContent = 'Verifying identity...';
+                } else if (progress < 90) {
+                    document.getElementById('biometricStatus').textContent = 'Matching with database...';
+                } else if (progress < 100) {
+                    document.getElementById('biometricStatus').textContent = 'Finalizing verification...';
+                }
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    document.getElementById('biometricStatus').textContent = 'Verification successful! Recording attendance...';
+                    
+                    setTimeout(() => {
+                        hideModal(biometricModal);
+                        recordAttendance('Biometric', 'Present');
+                    }, 1000);
+                }
+            }, 100);
+        }
+        
+        function simulateFaceRecognitionCheckIn() {
+            showModal(faceModal);
+        }
+        
+        function simulateIdCardCheckIn() {
+            showModal(idCardModal);
+        }
+    </script>
+</body>
+</html>
